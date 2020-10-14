@@ -1,0 +1,33 @@
+<html>
+<head>
+    <title>esp chart</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Time', 'Temp'],
+                {{#chartdata}}
+                ["{{time}}", {{temp}}],
+                {{/chartdata}}
+            ]);
+
+            var options = {
+                title: 'Temperature',
+                //curveType: 'function',
+                legend: { position: 'none' },
+                hAxis: { textPosition: 'none' },
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+            chart.draw(data, options);
+        }
+    </script>
+</head>
+<body>
+    <div id="curve_chart" style="width: 1600px; height: 600px"></div>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+    "name": "esp_chart",
+    "version": "1.0.0",
+    "dependencies": {
+        "express": "4.17.1",
+        "body-parser": "1.19.0",
+        "mustache": "4.0.1",
+        "dateformat": "3.0.3",
+        "time-ago": "0.2.1",
+        "node-schedule": "1.3.2"
+    }
+}
