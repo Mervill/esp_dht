@@ -1,5 +1,4 @@
 const express = require('express')
-const bodyParser = require('body-parser')
 const mustache = require('mustache')
 const dateFormat = require('dateformat')
 const schedule = require('node-schedule')
@@ -22,8 +21,6 @@ const app = express()
 app.use('/static', express.static(__dirname + '/static'))
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
-//app.use(bodyParser.urlencoded({ extended: false }))
-//app.use(bodyParser.json())
 
 app.get('/', (req, res) => {
     res.send(mustache.render(templates.index, {
