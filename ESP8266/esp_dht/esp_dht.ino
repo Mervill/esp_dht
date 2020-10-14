@@ -111,7 +111,20 @@ void loop()
   if((unsigned long)(millis() - poll_time_now) > poll_period)
   {
     poll_time_now = millis();
+    Loop_PollDHT();
+  }
+  
+  if((unsigned long)(millis() - send_time_now) > send_period)
+  {
+    send_time_now = millis();
+    Loop_SendData();
+  }
+  
+  server.handleClient();
+}
 
+void Loop_PollDHT()
+{
     float readValueTemp = dht.readTemperature();
     if (isnan(readValueTemp))
     {
@@ -135,47 +148,46 @@ void loop()
     memmove(&HumiAverageSet[1], &HumiAverageSet[0], sizeof(float) * (AVGSET_LEN - 1));
     HumiAverageSet[0] = Humidity;
     HumiAverage = AverageOfSet(&HumiAverageSet[0], AVGSET_LEN);
-  }
-  if((unsigned long)(millis() - send_time_now) > send_period)
+}
+
+void Loop_SendData()
+{
+  WiFiClient client;
+  HTTPClient http;
+
+  String remoteUrl = "";
+  remoteUrl += "http://";
+  remoteUrl += remoteAddress;
+  remoteUrl += "/log";
+
+  String payload = "";
+  payload += "{\"temp\":";  
+  payload += String(TempAverage, 1);
+  payload += "}";
+  
+  http.begin(client, remoteUrl.c_str());
+  http.addHeader("Content-Type", "application/json");
+  int httpCode = http.POST(payload.c_str());
+
+  // httpCode will be negative on error
+  if (httpCode > 0)
   {
-    send_time_now = millis();
-    
-    WiFiClient client;
-    HTTPClient http;
+    Serial.printf("[HTTP] POST %d\n", httpCode);
 
-    String remoteUrl = "";
-    remoteUrl += "http://";
-    remoteUrl += remoteAddress;
-    remoteUrl += "/log";
-
-    String payload = "";
-    payload += "{\"temp\":";  
-    payload += String(TempAverage, 1);
-    payload += "}";
-    
-    http.begin(client, remoteUrl.c_str());
-    http.addHeader("Content-Type", "application/json");
-    int httpCode = http.POST(payload.c_str());
-
-    // httpCode will be negative on error
-    if (httpCode > 0) {
-      // HTTP header has been send and Server response header has been handled
-      Serial.printf("[HTTP] POST... code: %d\n", httpCode);
-
-      // file found at server
-      if (httpCode == HTTP_CODE_OK) {
-        const String& payload = http.getString();
-        Serial.println("received payload:\n<<");
-        Serial.println(payload);
-        Serial.println(">>");
-      }
-    } else {
-      Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
-    }
-    
-    http.end();
+    // file found at server
+    /*if (httpCode == HTTP_CODE_OK) {
+      const String& payload = http.getString();
+      Serial.println("received payload:\n<<");
+      Serial.println(payload);
+      Serial.println(">>");
+    }*/
   }
-  server.handleClient();
+  else
+  {
+    Serial.printf("[HTTP] POST %d %s\n", httpCode, http.errorToString(httpCode).c_str());
+  }
+  
+  http.end();
 }
 
 void handle_OnConnect()
