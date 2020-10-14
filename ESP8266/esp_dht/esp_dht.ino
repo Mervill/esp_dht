@@ -6,12 +6,10 @@
 #include "DHT.h"
 
 #include "WiFiConfig.h"
-
-// https://lastminuteengineers.com/esp8266-dht11-dht22-web-server-tutorial/
+#include "DeployConfig.h"
 
 // DHT MIN INTERVAL: 2000
 
-// Uncomment one of the lines below for whatever DHT sensor type you're using!
 //#define DHTTYPE DHT11   // DHT 11
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
@@ -25,7 +23,7 @@
 const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASS;
 
-char* remoteAddress = "";
+char* remoteAddress = DEPLOY_REMOTE_ADDDR;
 
 ESP8266WebServer server(80);
                
@@ -68,6 +66,7 @@ void setup()
 
   #ifndef NOSERIAL
   Serial.println();
+  Serial.println(WiFi.macAddress());
   Serial.print("Connecting to ");
   Serial.println(ssid);
   #endif
@@ -98,6 +97,7 @@ void setup()
   }
   
   server.on("/", handle_OnConnect);
+  server.on("/whois", handle_WhoIs);
   server.onNotFound(handle_NotFound);
   server.begin();
 
@@ -181,6 +181,48 @@ void loop()
 void handle_OnConnect()
 {
   server.send(200, "text/html", SendHTML(Temperature, TempAverage, Humidity, HumiAverage)); 
+}
+
+void handle_WhoIs()
+{
+  String payload = "";
+  payload += "{";
+
+  payload += "\"hostname\":";
+  payload += "\"";
+  payload += WiFi.hostname();
+  payload += "\"";
+
+  payload += ",";
+  
+  payload += "\"mac\":";
+  payload += "\"";
+  payload += WiFi.macAddress();
+  payload += "\"";
+  
+  payload += ",";
+
+  payload += "\"millis\":";
+  payload += String(millis());
+
+  payload += ",";
+
+  payload += "\"ErrorReadNaN\":";
+  payload += String(ErrorReadNaN);
+
+  payload += ",";
+
+  payload += "\"Temperature\":";
+  payload += String(Temperature);
+
+  payload += ",";
+
+  payload += "\"Humidity\":";
+  payload += String(Humidity);
+  
+  payload += "}";
+
+  server.send(200, "application/json", payload);
 }
 
 void handle_NotFound()

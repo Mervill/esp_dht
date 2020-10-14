@@ -4,4 +4,4 @@ ESP8266 DHT22 Sensor & NodeJs logging/display app
 
 ## WifiConfig
 
-Duplicate `ESP8266\esp_dht\WifiConfig.template.h`, rename it too `WifiConfig.h` and fill it with your WiFi settings.
+Duplicate `ESP8266\esp_dht\WifiConfig.h.template`, rename it too `WifiConfig.h` and fill it with your WiFi settings.
