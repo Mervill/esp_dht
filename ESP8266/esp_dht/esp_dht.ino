@@ -62,9 +62,7 @@ void setup()
   #ifndef NOSERIAL
   Serial.begin(SERIAL_BAUD);
   delay(1000);
-  #endif
-
-  #ifndef NOSERIAL
+  
   Serial.println();
   Serial.println(WiFi.macAddress());
   Serial.print("Connecting to ");
@@ -96,9 +94,9 @@ void setup()
     HumiAverageSet[x] = Humidity;
   }
   
-  server.on("/", handle_OnConnect);
-  server.on("/whois", handle_WhoIs);
-  server.onNotFound(handle_NotFound);
+  server.on("/", http_Index);
+  server.on("/whois", http_WhoIs);
+  server.onNotFound(http_NotFound);
   server.begin();
 
   #ifndef NOSERIAL
@@ -152,6 +150,31 @@ void Loop_PollDHT()
 
 void Loop_SendData()
 {
+  String payload = "";
+  payload += "{";
+
+  payload += "\"mac\":";
+  payload += "\"";
+  payload += WiFi.macAddress();
+  payload += "\"";
+
+  payload += ",";
+  
+  payload += "\"temp\":";
+  payload += String(Temperature, 1);
+
+  payload += ",";
+
+  payload += "\"humi\":";
+  payload += String(Humidity, 1);
+  
+  payload += "}";
+
+  #ifndef NOSERIAL
+  // json over serial, what sins hath we wrought in pursuit of our madness?
+  Serial.println(payload);
+  #endif
+
   WiFiClient client;
   HTTPClient http;
 
@@ -159,11 +182,6 @@ void Loop_SendData()
   remoteUrl += "http://";
   remoteUrl += remoteAddress;
   remoteUrl += "/log";
-
-  String payload = "";
-  payload += "{\"temp\":";  
-  payload += String(TempAverage, 1);
-  payload += "}";
   
   http.begin(client, remoteUrl.c_str());
   http.addHeader("Content-Type", "application/json");
@@ -190,12 +208,12 @@ void Loop_SendData()
   http.end();
 }
 
-void handle_OnConnect()
+void http_Index()
 {
   server.send(200, "text/html", SendHTML(Temperature, TempAverage, Humidity, HumiAverage)); 
 }
 
-void handle_WhoIs()
+void http_WhoIs()
 {
   String payload = "";
   payload += "{";
@@ -237,7 +255,7 @@ void handle_WhoIs()
   server.send(200, "application/json", payload);
 }
 
-void handle_NotFound()
+void http_NotFound()
 {
   server.send(404, "text/plain", "Not found");
 }
