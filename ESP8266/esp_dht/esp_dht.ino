@@ -232,6 +232,11 @@ void http_WhoIs()
   
   payload += ",";
 
+  payload += "\"RSSI\":";
+  payload += String(WiFi.RSSI());
+
+  payload += ",";
+
   payload += "\"millis\":";
   payload += String(millis());
 
