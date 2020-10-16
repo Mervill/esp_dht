@@ -65,7 +65,7 @@ void setup()
   
   Serial.println();
   Serial.println(WiFi.macAddress());
-  Serial.print("Connecting to ");
+  Serial.print("WiFi Connecting to ");
   Serial.println(ssid);
   #endif
 
@@ -77,17 +77,19 @@ void setup()
     delay(1000);
 
   #ifndef NOSERIAL
-  Serial.print("WiFi Connected - localIP: ");
+  Serial.print("WiFi Connected as ");
+  Serial.print(WiFi.hostname());
+  Serial.print(" @ ");
   Serial.println(WiFi.localIP());
+  Serial.print("WiFi RSSI: ");
+  Serial.println(WiFi.RSSI());
   #endif
 
-  pinMode(DHTPIN, INPUT);
   dht.begin();
-
-  // Fill the average sets on startup
   delay(100);
   Temperature = dht.readTemperature();
   Humidity = dht.readHumidity();
+  // Fill the average sets on startup
   for (int x = 0; x < AVGSET_LEN; x++)
   {
     TempAverageSet[x] = Temperature;
@@ -100,7 +102,9 @@ void setup()
   server.begin();
 
   #ifndef NOSERIAL
-  Serial.println("HTTP server started");
+  Serial.println("HTTP Server started");
+  
+  Serial.println("setup() complete");
   #endif
 }
 
@@ -267,44 +271,11 @@ void http_NotFound()
 
 String SendHTML(float _temperature, float _avgTemperature, float _humidity, float _avgHumidity)
 {
-  #ifndef NOSERIAL
-  /*for (int x = 0; x < AVGSET_LEN; x++)
-  {
-    Serial.print(TempAverageSet[x]);
-    if (x != (AVGSET_LEN - 1))
-      Serial.print(", ");
-  }
-  Serial.print(" avg: ");
-  Serial.print(_avgTemperature);
-  Serial.println();*/
-  #endif
-
-  /*WiFiClient client;
-  HTTPClient http;
-  if (http.begin(client, "http://192.168.1.67:8888/now"))
-  {
-      Serial.print("[HTTP] GET...\n");
-      // start connection and send HTTP header
-      int httpCode = http.GET();
-      // httpCode will be negative on error
-      if (httpCode > 0) {
-        // HTTP header has been send and Server response header has been handled
-        Serial.printf("[HTTP] GET... code: %d\n", httpCode);
-        // file found at server
-        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-          String payload = http.getString();
-          Serial.println(payload);
-        }
-      } else {
-        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
-      }
-      http.end();
-  }*/
-  
   String ptr = "<!DOCTYPE html>\n";
   
   ptr +="<html>\n";
   ptr +="<head>\n";
+  ptr += "<meta http-equiv=\"refresh\" content=\"30\">";
   ptr +="<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
   ptr +="<link href=\"https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap\" rel=\"stylesheet\">";
   ptr +="<title>Sensor Report</title>\n";
@@ -328,8 +299,8 @@ String SendHTML(float _temperature, float _avgTemperature, float _humidity, floa
   ptr +="<div id=\"webpage\">\n";
   ptr +="<h1>Sensor Report</h1>\n";
   ptr +="<div class=\"data\">\n";
-  ptr +="<div class=\"side-by-side temperature-icon\">\n";
   
+  ptr +="<div class=\"side-by-side temperature-icon\">\n";
   ptr +="<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n";
   ptr +="width=\"9.915px\" height=\"22px\" viewBox=\"0 0 9.915 22\" enable-background=\"new 0 0 9.915 22\" xml:space=\"preserve\">\n";
   ptr +="<path fill=\"#FFFFFF\" d=\"M3.498,0.53c0.377-0.331,0.877-0.501,1.374-0.527C5.697-0.04,6.522,0.421,6.924,1.142\n";
@@ -338,9 +309,8 @@ String SendHTML(float _temperature, float _avgTemperature, float _humidity, floa
   ptr +="c-1.417-0.323-2.659-1.314-3.3-2.617C0.014,18.26-0.115,17.104,0.1,16.022c0.296-1.443,1.274-2.717,2.58-3.394\n";
   ptr +="c0.013-3.44,0-6.881,0.007-10.322C2.674,1.634,2.974,0.955,3.498,0.53z\"/>\n";
   ptr +="</svg>\n";
-  
   ptr +="</div>\n";
-  //ptr +="<div class=\"side-by-side temperature-text\"></div>\n";
+  
   ptr +="<div class=\"side-by-side temperature\">";
   ptr +=String(_temperature, 1);
   ptr +="<span class=\"superscript\">&deg;C</span>";
@@ -348,16 +318,17 @@ String SendHTML(float _temperature, float _avgTemperature, float _humidity, floa
   ptr +=String(_avgTemperature, 1);
   ptr +="<span class=\"superscript\">&deg;Cavg</span>&nbsp;&nbsp;</div>\n";
   ptr +="</div>\n";
+
+  ptr +="</div>\n"; // data
   ptr +="<div class=\"data\">\n";
-  ptr +="<div class=\"side-by-side humidity-icon\">\n";
   
+  ptr +="<div class=\"side-by-side humidity-icon\">\n";
   ptr +="<svg version=\"1.1\" id=\"Layer_2\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n\"; width=\"12px\" height=\"17.955px\" viewBox=\"0 0 13 17.955\" enable-background=\"new 0 0 13 17.955\" xml:space=\"preserve\">\n";
   ptr +="<path fill=\"#FFFFFF\" d=\"M1.819,6.217C3.139,4.064,6.5,0,6.5,0s3.363,4.064,4.681,6.217c1.793,2.926,2.133,5.05,1.571,7.057\n";
   ptr +="c-0.438,1.574-2.264,4.681-6.252,4.681c-3.988,0-5.813-3.107-6.252-4.681C-0.313,11.267,0.026,9.143,1.819,6.217\"></path>\n";
   ptr +="</svg>\n";
-  
   ptr +="</div>\n";
-  //ptr +="<div class=\"side-by-side humidity-text\"></div>\n";
+  
   ptr +="<div class=\"side-by-side humidity\">";
   ptr +=String(_humidity, 1);
   ptr +="<span class=\"superscript\">%</span>";
@@ -365,8 +336,20 @@ String SendHTML(float _temperature, float _avgTemperature, float _humidity, floa
   ptr +=String(_avgHumidity, 1);
   ptr +="<span class=\"superscript\">%avg</span>&nbsp;&nbsp;</div>\n";
   ptr +="</div>\n";
+
+  ptr +="</div>\n"; // data
+
+  ptr += "<div>";
+  //ptr += "<span>";
+  ptr += String(WiFi.RSSI());
+  ptr += "&nbsp;";
+  ptr += String((float)millis()/1000.0f);
+  ptr += "&nbsp;";
+  ptr += String(ErrorReadNaN);
+  //ptr += "</span>";
+  ptr += "</div>";
   
-  ptr +="</div>\n";
+  ptr +="</div>\n"; // webpage
   
   ptr +="</body>\n";
   ptr +="</html>\n";
