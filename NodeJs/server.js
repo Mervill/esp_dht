@@ -9,6 +9,7 @@ const os = require('os')
 const DHTAppConfig = {
     HTTPPort: 8888,
     TemplateDir: path.join(__dirname, 'template'),
+    LogDir: path.join(__dirname, 'log'),
 }
 
 const templates = {
@@ -80,7 +81,8 @@ function SetLogStream()
 
     let dateCode = dateFormat(new Date(),"dd-mm-yy")
     let logName = `log-${dateCode}.txt`
-    logStream = fs.createWriteStream(logName, {flags:'a'})
+    let logPath = path.join(DHTAppConfig.LogDir, logName)
+    logStream = fs.createWriteStream(logPath, {flags:'a'})
 
     logStream.write(`${dateFormat(new Date(),"dd/mm/yy @ hh:MM:ssTT")},\n`)
     logStream.write(`time,temperature\n`)
@@ -91,6 +93,12 @@ function SetLogStream()
 
 app.listen(DHTAppConfig.HTTPPort, () => {
     
+
+    if (!fs.existsSync(DHTAppConfig.LogDir))
+    {
+        fs.mkdirSync(DHTAppConfig.LogDir);
+    }
+
     SetLogStream();
     schedule.scheduleJob('0 0 * * *', () => {
         SetLogStream();
