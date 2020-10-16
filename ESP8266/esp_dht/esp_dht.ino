@@ -274,8 +274,9 @@ String SendHTML(float _temperature, float _avgTemperature, float _humidity, floa
   String ptr = "<!DOCTYPE html>\n";
   
   ptr +="<html>\n";
-  ptr +="<head>\n";
-  ptr += "<meta http-equiv=\"refresh\" content=\"30\">";
+  ptr +="<head lang=\"en\">\n";
+  ptr +="<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n";
+  ptr +="<meta http-equiv=\"refresh\" content=\"60\">";
   ptr +="<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
   ptr +="<link href=\"https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap\" rel=\"stylesheet\">";
   ptr +="<title>Sensor Report</title>\n";
