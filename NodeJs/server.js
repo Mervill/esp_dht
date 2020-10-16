@@ -9,7 +9,7 @@ const os = require('os')
 const DHTAppConfig = {
     HTTPPort: 8888,
     TemplateDir: path.join(__dirname, 'template'),
-    LogDir: path.join(__dirname, 'log'),
+    LogDir: path.join(__dirname, 'log'), // LogDir: path.join(__dirname, 'static', 'log')
 }
 
 const templates = {
@@ -37,20 +37,21 @@ app.get('/', (req, res) => {
 
 app.post('/log', (req, res) => {
 
-    let newdata = req.body
-    newdata.time = dateFormat(new Date(), "hh:MM:ssTT")
+    let now = new Date()
 
+    let newdata = req.body
+    newdata.time = dateFormat(now, "hh:MM:ssTT")
     console.log(JSON.stringify(newdata))
 
     let logString = `${newdata.time},${newdata.temp}`
-    //console.log(logString)
     logStream.write(`${logString}\n`)
+
+    newdata.time = now.getTime()
 
     tempatureDataSet.push(newdata)
     while (tempatureDataSet.length > graphDataLength)
         tempatureDataSet.shift()
 
-    let now = new Date()
     res.send(`<pre>${dateFormat(now, "hh:MM:ss TT - dd/mm/yy")}</pre>`)
 })
 

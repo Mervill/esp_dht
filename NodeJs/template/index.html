@@ -13,7 +13,7 @@
             var data = google.visualization.arrayToDataTable([
                 ['Time', 'Temp'],
                 {{#chartdata}}
-                ["{{time}}", {{temp}}],
+                [new Date({{time}}), {{temp}}],
                 {{/chartdata}}
             ]);
 
