@@ -31,7 +31,8 @@ app.use(express.json())
 
 app.get('/', (req, res) => {
     res.send(mustache.render(templates.index, {
-        chartdata: tempatureDataSet
+        currentTemp: tempatureDataSet[tempatureDataSet.length - 1].temp,
+        chartdata: tempatureDataSet,
     }))
 })
 
@@ -96,9 +97,7 @@ app.listen(DHTAppConfig.HTTPPort, () => {
     
 
     if (!fs.existsSync(DHTAppConfig.LogDir))
-    {
         fs.mkdirSync(DHTAppConfig.LogDir);
-    }
 
     SetLogStream();
     schedule.scheduleJob('0 0 * * *', () => {
