@@ -1,1 +1,2 @@
 #define DEPLOY_REMOTE_ADDDR ""
+#define DEPLOY_SENSOR_NICKNAME ""

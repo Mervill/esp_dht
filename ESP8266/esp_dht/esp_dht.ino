@@ -24,6 +24,7 @@ const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASS;
 
 char* remoteAddress = DEPLOY_REMOTE_ADDDR;
+char* sensorNickname = DEPLOY_SENSOR_NICKNAME;
 
 ESP8266WebServer server(80);
                
@@ -36,19 +37,20 @@ unsigned long poll_time_now = 0;
 int send_period = 30000;
 unsigned long send_time_now = 0;
 
-#define AVGSET_LEN 15
+//#define AVGSET_LEN 15
 
-float TempAverageSet[AVGSET_LEN];
-float TempAverage = 0;
+//float TempAverageSet[AVGSET_LEN];
+//float TempAverage = 0;
 
-float HumiAverageSet[AVGSET_LEN];
-float HumiAverage = 0;
+//float HumiAverageSet[AVGSET_LEN];
+//float HumiAverage = 0;
 
 float Temperature = 0;
 float Humidity = 0;
 
 int ErrorReadNaN = 0;
 
+/*
 float AverageOfSet(float valueSet[], int size)
 {
     float total = 0;
@@ -56,6 +58,7 @@ float AverageOfSet(float valueSet[], int size)
       total += valueSet[x];
     return total/((float)size);
 }
+*/
 
 void setup()
 {
@@ -89,12 +92,15 @@ void setup()
   delay(100);
   Temperature = dht.readTemperature();
   Humidity = dht.readHumidity();
+  
+  /*
   // Fill the average sets on startup
   for (int x = 0; x < AVGSET_LEN; x++)
   {
     TempAverageSet[x] = Temperature;
     HumiAverageSet[x] = Humidity;
   }
+  */
   
   server.on("/", http_Index);
   server.on("/whois", http_WhoIs);
@@ -142,7 +148,8 @@ void Loop_PollDHT()
       ErrorReadNaN++;
     }
     Humidity = readValueHumi;
-    
+
+    /*
     memmove(&TempAverageSet[1], &TempAverageSet[0], sizeof(float) * (AVGSET_LEN - 1));
     TempAverageSet[0] = Temperature;
     TempAverage = AverageOfSet(&TempAverageSet[0], AVGSET_LEN);
@@ -150,6 +157,7 @@ void Loop_PollDHT()
     memmove(&HumiAverageSet[1], &HumiAverageSet[0], sizeof(float) * (AVGSET_LEN - 1));
     HumiAverageSet[0] = Humidity;
     HumiAverage = AverageOfSet(&HumiAverageSet[0], AVGSET_LEN);
+    */
 }
 
 void Loop_SendData()
@@ -214,7 +222,7 @@ void Loop_SendData()
 
 void http_Index()
 {
-  server.send(200, "text/html", SendHTML(Temperature, TempAverage, Humidity, HumiAverage)); 
+  server.send(200, "text/html", SendHTML(Temperature, Humidity)); 
 }
 
 void http_WhoIs()
@@ -269,13 +277,14 @@ void http_NotFound()
   server.send(404, "text/plain", "Not found");
 }
 
-String SendHTML(float _temperature, float _avgTemperature, float _humidity, float _avgHumidity)
+String SendHTML(float _temperature, float _humidity)
 {
   String ptr = "<!DOCTYPE html>\n";
   
   ptr +="<html>\n";
-  ptr +="<head>\n";
-  ptr += "<meta http-equiv=\"refresh\" content=\"30\">";
+  ptr +="<head lang=\"en\">\n";
+  ptr +="<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n";
+  ptr +="<meta http-equiv=\"refresh\" content=\"60\">";
   ptr +="<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
   ptr +="<link href=\"https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap\" rel=\"stylesheet\">";
   ptr +="<title>Sensor Report</title>\n";
@@ -297,7 +306,9 @@ String SendHTML(float _temperature, float _avgTemperature, float _humidity, floa
   ptr +="<body>\n";
   
   ptr +="<div id=\"webpage\">\n";
-  ptr +="<h1>Sensor Report</h1>\n";
+  ptr +="<h1>";
+  ptr +=sensorNickname;
+  ptr +="</h1>\n";
   ptr +="<div class=\"data\">\n";
   
   ptr +="<div class=\"side-by-side temperature-icon\">\n";
@@ -314,16 +325,17 @@ String SendHTML(float _temperature, float _avgTemperature, float _humidity, floa
   ptr +="<div class=\"side-by-side temperature\">";
   ptr +=String(_temperature, 1);
   ptr +="<span class=\"superscript\">&deg;C</span>";
-  ptr +="&nbsp;";
+  /*ptr +="&nbsp;";
   ptr +=String(_avgTemperature, 1);
-  ptr +="<span class=\"superscript\">&deg;Cavg</span>&nbsp;&nbsp;</div>\n";
+  ptr +="<span class=\"superscript\">&deg;Cavg</span>&nbsp;&nbsp;\n";*/
   ptr +="</div>\n";
 
   ptr +="</div>\n"; // data
   ptr +="<div class=\"data\">\n";
   
   ptr +="<div class=\"side-by-side humidity-icon\">\n";
-  ptr +="<svg version=\"1.1\" id=\"Layer_2\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n\"; width=\"12px\" height=\"17.955px\" viewBox=\"0 0 13 17.955\" enable-background=\"new 0 0 13 17.955\" xml:space=\"preserve\">\n";
+  ptr +="<svg version=\"1.1\" id=\"Layer_2\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n";
+  ptr += "width=\"12px\" height=\"17.955px\" viewBox=\"0 0 13 17.955\" enable-background=\"new 0 0 13 17.955\" xml:space=\"preserve\">\n";
   ptr +="<path fill=\"#FFFFFF\" d=\"M1.819,6.217C3.139,4.064,6.5,0,6.5,0s3.363,4.064,4.681,6.217c1.793,2.926,2.133,5.05,1.571,7.057\n";
   ptr +="c-0.438,1.574-2.264,4.681-6.252,4.681c-3.988,0-5.813-3.107-6.252-4.681C-0.313,11.267,0.026,9.143,1.819,6.217\"></path>\n";
   ptr +="</svg>\n";
@@ -332,14 +344,14 @@ String SendHTML(float _temperature, float _avgTemperature, float _humidity, floa
   ptr +="<div class=\"side-by-side humidity\">";
   ptr +=String(_humidity, 1);
   ptr +="<span class=\"superscript\">%</span>";
-  ptr +="&nbsp;";
+  /*ptr +="&nbsp;";
   ptr +=String(_avgHumidity, 1);
-  ptr +="<span class=\"superscript\">%avg</span>&nbsp;&nbsp;</div>\n";
+  ptr +="<span class=\"superscript\">%avg</span>&nbsp;&nbsp;\n";*/
   ptr +="</div>\n";
 
   ptr +="</div>\n"; // data
 
-  ptr += "<div>";
+  ptr +="<div>";
   //ptr += "<span>";
   ptr += String(WiFi.RSSI());
   ptr += "&nbsp;";
