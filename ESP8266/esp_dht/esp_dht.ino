@@ -24,6 +24,7 @@ const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASS;
 
 char* remoteAddress = DEPLOY_REMOTE_ADDDR;
+char* sensorNickname = DEPLOY_SENSOR_NICKNAME;
 
 ESP8266WebServer server(80);
                
@@ -305,7 +306,9 @@ String SendHTML(float _temperature, float _humidity)
   ptr +="<body>\n";
   
   ptr +="<div id=\"webpage\">\n";
-  ptr +="<h1>Sensor Report</h1>\n";
+  ptr +="<h1>";
+  ptr +=sensorNickname;
+  ptr +="</h1>\n";
   ptr +="<div class=\"data\">\n";
   
   ptr +="<div class=\"side-by-side temperature-icon\">\n";
