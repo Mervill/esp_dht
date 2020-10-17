@@ -128,17 +128,17 @@ void Loop_SendData()
   String payload = "";
   payload += "{";
 
-  payload += "\"nickname\":";
+  payload += "\"nick\":";
   payload += "\"";
   payload += sensorNickname;
   payload += "\"";
   payload += ",";
 
-  payload += "\"mac\":";
+  /*payload += "\"mac\":";
   payload += "\"";
   payload += WiFi.macAddress();
   payload += "\"";
-  payload += ",";
+  payload += ",";*/
   
   payload += "\"temp\":";
   payload += String(Temperature, 1);
@@ -146,6 +146,10 @@ void Loop_SendData()
 
   payload += "\"humi\":";
   payload += String(Humidity, 1);
+  payload += ",";
+
+  payload += "\"rssi\":";
+  payload += String(WiFi.RSSI());
   
   payload += "}";
 
@@ -169,8 +173,9 @@ void Loop_SendData()
   // httpCode will be negative on error
   if (httpCode > 0)
   {
+    #ifndef NOSERIAL
     Serial.printf("[HTTP] POST %d\n", httpCode);
-
+    #endif
     // file found at server
     /*if (httpCode == HTTP_CODE_OK) {
       const String& payload = http.getString();
@@ -181,7 +186,9 @@ void Loop_SendData()
   }
   else
   {
+    #ifndef NOSERIAL
     Serial.printf("[HTTP] POST %d %s\n", httpCode, http.errorToString(httpCode).c_str());
+    #endif
   }
   
   http.end();
@@ -288,38 +295,38 @@ void http_WhoIs()
   String payload = "";
   payload += "{";
 
+  payload += "\"nickname\":";
+  payload += "\"";
+  payload += sensorNickname;
+  payload += "\"";
+  payload += ",";
+
   payload += "\"hostname\":";
   payload += "\"";
   payload += WiFi.hostname();
   payload += "\"";
-
   payload += ",";
   
   payload += "\"mac\":";
   payload += "\"";
   payload += WiFi.macAddress();
   payload += "\"";
-  
   payload += ",";
 
   payload += "\"RSSI\":";
   payload += String(WiFi.RSSI());
-
   payload += ",";
 
   payload += "\"millis\":";
   payload += String(millis());
-
   payload += ",";
 
   payload += "\"ErrorReadNaN\":";
   payload += String(ErrorReadNaN);
-
   payload += ",";
 
   payload += "\"Temperature\":";
   payload += String(Temperature);
-
   payload += ",";
 
   payload += "\"Humidity\":";
