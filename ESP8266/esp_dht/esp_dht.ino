@@ -128,16 +128,20 @@ void Loop_SendData()
   String payload = "";
   payload += "{";
 
+  payload += "\"nickname\":";
+  payload += "\"";
+  payload += sensorNickname;
+  payload += "\"";
+  payload += ",";
+
   payload += "\"mac\":";
   payload += "\"";
   payload += WiFi.macAddress();
   payload += "\"";
-
   payload += ",";
   
   payload += "\"temp\":";
   payload += String(Temperature, 1);
-
   payload += ",";
 
   payload += "\"humi\":";
@@ -190,6 +194,7 @@ void http_NotFound()
 
 void http_Index()
 {
+  String tempString = String(Temperature, 1);
   String payload = "<!DOCTYPE html>\n";
   
   payload += "<html>\n";
@@ -198,7 +203,11 @@ void http_Index()
   payload += "<meta http-equiv=\"refresh\" content=\"60\">";
   payload += "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
   payload += "<link href=\"https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap\" rel=\"stylesheet\">";
-  payload += "<title>Sensor Report</title>\n";
+  payload += "<title>";
+  payload += tempString;
+  payload += "C | ";
+  payload += sensorNickname;
+  payload += "</title>\n";
   payload += "<style>\n";
   payload += "html{font-family: 'Roboto Mono', monospace; display: block; margin: 0px auto; text-align: center;color: #333333;}\n";
   payload += "body{margin-top: 50px;}\n";
@@ -217,9 +226,10 @@ void http_Index()
   payload += "<body>\n";
   payload += "<div id=\"webpage\">\n"; // webpage
   
-  payload += "<h1>";
+  payload += "<h1 style=\"margin:0;\">";
   payload += sensorNickname;
   payload += "</h1>\n";
+  payload += "<h2 style=\"margin:0;\">DHT Sensor Report</h2>";
   payload += "<div class=\"data\">\n";
   
   payload += "<div class=\"side-by-side temperature-icon\">\n";
@@ -234,7 +244,7 @@ void http_Index()
   payload += "</div>\n";
   
   payload += "<div class=\"side-by-side temperature\">";
-  payload += String(Temperature, 1);
+  payload += tempString;
   payload += "<span class=\"superscript\">&deg;C</span>";
   payload += "</div>\n";
 
