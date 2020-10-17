@@ -183,9 +183,94 @@ void Loop_SendData()
   http.end();
 }
 
+void http_NotFound()
+{
+  server.send(404, "text/plain", "404 Not Found");
+}
+
 void http_Index()
 {
-  server.send(200, "text/html", SendHTML(Temperature, Humidity)); 
+  String payload = "<!DOCTYPE html>\n";
+  
+  payload += "<html>\n";
+  payload += "<head lang=\"en\">\n";
+  payload += "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n";
+  payload += "<meta http-equiv=\"refresh\" content=\"60\">";
+  payload += "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
+  payload += "<link href=\"https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap\" rel=\"stylesheet\">";
+  payload += "<title>Sensor Report</title>\n";
+  payload += "<style>\n";
+  payload += "html{font-family: 'Roboto Mono', monospace; display: block; margin: 0px auto; text-align: center;color: #333333;}\n";
+  payload += "body{margin-top: 50px;}\n";
+  //payload += "h1{margin: 50px auto 30px;}\n";
+  payload += ".side-by-side{display: inline-block;vertical-align: middle;position: relative;}\n";
+  payload += ".humidity-icon{background-color: #3498db;width: 30px;height: 30px;border-radius: 50%;line-height: 36px;margin-right: 10px;}\n";
+  payload += ".humidity-text{font-weight: 600;padding-left: 15px;font-size: 19px;width: auto;text-align: left;}\n";
+  payload += ".humidity{font-weight: 300;font-size: 60px;color: #3498db;}\n";
+  payload += ".temperature-icon{background-color: #f39c12;width: 30px;height: 30px;border-radius: 50%;line-height: 40px;margin-right: 10px;}\n";
+  payload += ".temperature-text{font-weight: 600;padding-left: 15px;font-size: 19px;width: auto;text-align: left;}\n";
+  payload += ".temperature{font-weight: 300;font-size: 60px;color: #f39c12;}\n";
+  payload += ".superscript{font-size: 17px;font-weight: 600;position: absolute;top: 15px;}\n";
+  payload += ".data{padding: 10px;}\n";
+  payload += "</style>\n";
+  payload += "</head>\n";
+  payload += "<body>\n";
+  payload += "<div id=\"webpage\">\n"; // webpage
+  
+  payload += "<h1>";
+  payload += sensorNickname;
+  payload += "</h1>\n";
+  payload += "<div class=\"data\">\n";
+  
+  payload += "<div class=\"side-by-side temperature-icon\">\n";
+  payload += "<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n";
+  payload += "width=\"9.915px\" height=\"22px\" viewBox=\"0 0 9.915 22\" enable-background=\"new 0 0 9.915 22\" xml:space=\"preserve\">\n";
+  payload += "<path fill=\"#FFFFFF\" d=\"M3.498,0.53c0.377-0.331,0.877-0.501,1.374-0.527C5.697-0.04,6.522,0.421,6.924,1.142\n";
+  payload += "c0.237,0.399,0.315,0.871,0.311,1.33C7.229,5.856,7.245,9.24,7.227,12.625c1.019,0.539,1.855,1.424,2.301,2.491\n";
+  payload += "c0.491,1.163,0.518,2.514,0.062,3.693c-0.414,1.102-1.24,2.038-2.276,2.594c-1.056,0.583-2.331,0.743-3.501,0.463\n";
+  payload += "c-1.417-0.323-2.659-1.314-3.3-2.617C0.014,18.26-0.115,17.104,0.1,16.022c0.296-1.443,1.274-2.717,2.58-3.394\n";
+  payload += "c0.013-3.44,0-6.881,0.007-10.322C2.674,1.634,2.974,0.955,3.498,0.53z\"/>\n";
+  payload += "</svg>\n";
+  payload += "</div>\n";
+  
+  payload += "<div class=\"side-by-side temperature\">";
+  payload += String(Temperature, 1);
+  payload += "<span class=\"superscript\">&deg;C</span>";
+  payload += "</div>\n";
+
+  payload += "</div>\n"; // data
+  payload += "<div class=\"data\">\n";
+  
+  payload += "<div class=\"side-by-side humidity-icon\">\n";
+  payload += "<svg version=\"1.1\" id=\"Layer_2\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n";
+  payload +=  "width=\"12px\" height=\"17.955px\" viewBox=\"0 0 13 17.955\" enable-background=\"new 0 0 13 17.955\" xml:space=\"preserve\">\n";
+  payload += "<path fill=\"#FFFFFF\" d=\"M1.819,6.217C3.139,4.064,6.5,0,6.5,0s3.363,4.064,4.681,6.217c1.793,2.926,2.133,5.05,1.571,7.057\n";
+  payload += "c-0.438,1.574-2.264,4.681-6.252,4.681c-3.988,0-5.813-3.107-6.252-4.681C-0.313,11.267,0.026,9.143,1.819,6.217\"></path>\n";
+  payload += "</svg>\n";
+  payload += "</div>\n";
+  
+  payload += "<div class=\"side-by-side humidity\">";
+  payload += String(Humidity, 1);
+  payload += "<span class=\"superscript\">%</span>";
+  payload += "</div>\n";
+
+  payload += "</div>\n"; // data
+
+  payload += "<div>";
+  //payload +=  "<span>";
+  payload += String(WiFi.RSSI());
+  payload += "&nbsp;";
+  payload += String((float)millis()/1000.0f);
+  payload += "&nbsp;";
+  payload += String(ErrorReadNaN);
+  //payload += "</span>";
+  payload += "</div>";
+  
+  payload += "</div>\n"; // webpage
+  payload += "</body>\n";
+  payload += "</html>\n";
+  
+  server.send(200, "text/html", payload); 
 }
 
 void http_WhoIs()
@@ -233,95 +318,4 @@ void http_WhoIs()
   payload += "}";
 
   server.send(200, "application/json", payload);
-}
-
-void http_NotFound()
-{
-  server.send(404, "text/plain", "Not found");
-}
-
-String SendHTML(float _temperature, float _humidity)
-{
-  String ptr = "<!DOCTYPE html>\n";
-  
-  ptr +="<html>\n";
-  ptr +="<head lang=\"en\">\n";
-  ptr +="<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n";
-  ptr +="<meta http-equiv=\"refresh\" content=\"60\">";
-  ptr +="<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
-  ptr +="<link href=\"https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap\" rel=\"stylesheet\">";
-  ptr +="<title>Sensor Report</title>\n";
-  ptr +="<style>\n";
-  ptr +="html{font-family: 'Roboto Mono', monospace; display: block; margin: 0px auto; text-align: center;color: #333333;}\n";
-  ptr +="body{margin-top: 50px;}\n";
-  //ptr +="h1{margin: 50px auto 30px;}\n";
-  ptr +=".side-by-side{display: inline-block;vertical-align: middle;position: relative;}\n";
-  ptr +=".humidity-icon{background-color: #3498db;width: 30px;height: 30px;border-radius: 50%;line-height: 36px;margin-right: 10px;}\n";
-  ptr +=".humidity-text{font-weight: 600;padding-left: 15px;font-size: 19px;width: auto;text-align: left;}\n";
-  ptr +=".humidity{font-weight: 300;font-size: 60px;color: #3498db;}\n";
-  ptr +=".temperature-icon{background-color: #f39c12;width: 30px;height: 30px;border-radius: 50%;line-height: 40px;margin-right: 10px;}\n";
-  ptr +=".temperature-text{font-weight: 600;padding-left: 15px;font-size: 19px;width: auto;text-align: left;}\n";
-  ptr +=".temperature{font-weight: 300;font-size: 60px;color: #f39c12;}\n";
-  ptr +=".superscript{font-size: 17px;font-weight: 600;position: absolute;top: 15px;}\n";
-  ptr +=".data{padding: 10px;}\n";
-  ptr +="</style>\n";
-  ptr +="</head>\n";
-  ptr +="<body>\n";
-  
-  ptr +="<div id=\"webpage\">\n";
-  ptr +="<h1>";
-  ptr +=sensorNickname;
-  ptr +="</h1>\n";
-  ptr +="<div class=\"data\">\n";
-  
-  ptr +="<div class=\"side-by-side temperature-icon\">\n";
-  ptr +="<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n";
-  ptr +="width=\"9.915px\" height=\"22px\" viewBox=\"0 0 9.915 22\" enable-background=\"new 0 0 9.915 22\" xml:space=\"preserve\">\n";
-  ptr +="<path fill=\"#FFFFFF\" d=\"M3.498,0.53c0.377-0.331,0.877-0.501,1.374-0.527C5.697-0.04,6.522,0.421,6.924,1.142\n";
-  ptr +="c0.237,0.399,0.315,0.871,0.311,1.33C7.229,5.856,7.245,9.24,7.227,12.625c1.019,0.539,1.855,1.424,2.301,2.491\n";
-  ptr +="c0.491,1.163,0.518,2.514,0.062,3.693c-0.414,1.102-1.24,2.038-2.276,2.594c-1.056,0.583-2.331,0.743-3.501,0.463\n";
-  ptr +="c-1.417-0.323-2.659-1.314-3.3-2.617C0.014,18.26-0.115,17.104,0.1,16.022c0.296-1.443,1.274-2.717,2.58-3.394\n";
-  ptr +="c0.013-3.44,0-6.881,0.007-10.322C2.674,1.634,2.974,0.955,3.498,0.53z\"/>\n";
-  ptr +="</svg>\n";
-  ptr +="</div>\n";
-  
-  ptr +="<div class=\"side-by-side temperature\">";
-  ptr +=String(_temperature, 1);
-  ptr +="<span class=\"superscript\">&deg;C</span>";
-  ptr +="</div>\n";
-
-  ptr +="</div>\n"; // data
-  ptr +="<div class=\"data\">\n";
-  
-  ptr +="<div class=\"side-by-side humidity-icon\">\n";
-  ptr +="<svg version=\"1.1\" id=\"Layer_2\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n";
-  ptr += "width=\"12px\" height=\"17.955px\" viewBox=\"0 0 13 17.955\" enable-background=\"new 0 0 13 17.955\" xml:space=\"preserve\">\n";
-  ptr +="<path fill=\"#FFFFFF\" d=\"M1.819,6.217C3.139,4.064,6.5,0,6.5,0s3.363,4.064,4.681,6.217c1.793,2.926,2.133,5.05,1.571,7.057\n";
-  ptr +="c-0.438,1.574-2.264,4.681-6.252,4.681c-3.988,0-5.813-3.107-6.252-4.681C-0.313,11.267,0.026,9.143,1.819,6.217\"></path>\n";
-  ptr +="</svg>\n";
-  ptr +="</div>\n";
-  
-  ptr +="<div class=\"side-by-side humidity\">";
-  ptr +=String(_humidity, 1);
-  ptr +="<span class=\"superscript\">%</span>";
-  ptr +="</div>\n";
-
-  ptr +="</div>\n"; // data
-
-  ptr +="<div>";
-  //ptr += "<span>";
-  ptr += String(WiFi.RSSI());
-  ptr += "&nbsp;";
-  ptr += String((float)millis()/1000.0f);
-  ptr += "&nbsp;";
-  ptr += String(ErrorReadNaN);
-  //ptr += "</span>";
-  ptr += "</div>";
-  
-  ptr +="</div>\n"; // webpage
-  
-  ptr +="</body>\n";
-  ptr +="</html>\n";
-  
-  return ptr;
 }
