@@ -37,28 +37,10 @@ unsigned long poll_time_now = 0;
 int send_period = 30000;
 unsigned long send_time_now = 0;
 
-//#define AVGSET_LEN 15
-
-//float TempAverageSet[AVGSET_LEN];
-//float TempAverage = 0;
-
-//float HumiAverageSet[AVGSET_LEN];
-//float HumiAverage = 0;
-
 float Temperature = 0;
 float Humidity = 0;
 
 int ErrorReadNaN = 0;
-
-/*
-float AverageOfSet(float valueSet[], int size)
-{
-    float total = 0;
-    for (int x = 0; x < size; x++)
-      total += valueSet[x];
-    return total/((float)size);
-}
-*/
 
 void setup()
 {
@@ -92,16 +74,7 @@ void setup()
   delay(100);
   Temperature = dht.readTemperature();
   Humidity = dht.readHumidity();
-  
-  /*
-  // Fill the average sets on startup
-  for (int x = 0; x < AVGSET_LEN; x++)
-  {
-    TempAverageSet[x] = Temperature;
-    HumiAverageSet[x] = Humidity;
-  }
-  */
-  
+
   server.on("/", http_Index);
   server.on("/whois", http_WhoIs);
   server.onNotFound(http_NotFound);
@@ -148,16 +121,6 @@ void Loop_PollDHT()
       ErrorReadNaN++;
     }
     Humidity = readValueHumi;
-
-    /*
-    memmove(&TempAverageSet[1], &TempAverageSet[0], sizeof(float) * (AVGSET_LEN - 1));
-    TempAverageSet[0] = Temperature;
-    TempAverage = AverageOfSet(&TempAverageSet[0], AVGSET_LEN);
-
-    memmove(&HumiAverageSet[1], &HumiAverageSet[0], sizeof(float) * (AVGSET_LEN - 1));
-    HumiAverageSet[0] = Humidity;
-    HumiAverage = AverageOfSet(&HumiAverageSet[0], AVGSET_LEN);
-    */
 }
 
 void Loop_SendData()
@@ -325,9 +288,6 @@ String SendHTML(float _temperature, float _humidity)
   ptr +="<div class=\"side-by-side temperature\">";
   ptr +=String(_temperature, 1);
   ptr +="<span class=\"superscript\">&deg;C</span>";
-  /*ptr +="&nbsp;";
-  ptr +=String(_avgTemperature, 1);
-  ptr +="<span class=\"superscript\">&deg;Cavg</span>&nbsp;&nbsp;\n";*/
   ptr +="</div>\n";
 
   ptr +="</div>\n"; // data
@@ -344,9 +304,6 @@ String SendHTML(float _temperature, float _humidity)
   ptr +="<div class=\"side-by-side humidity\">";
   ptr +=String(_humidity, 1);
   ptr +="<span class=\"superscript\">%</span>";
-  /*ptr +="&nbsp;";
-  ptr +=String(_avgHumidity, 1);
-  ptr +="<span class=\"superscript\">%avg</span>&nbsp;&nbsp;\n";*/
   ptr +="</div>\n";
 
   ptr +="</div>\n"; // data
