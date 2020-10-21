@@ -13,17 +13,13 @@ const DHTAppConfig = {
     LogDir: path.join(__dirname, 'log'), // LogDir: path.join(__dirname, 'static', 'log')
 }
 
-const templates = {
-    index: fs.readFileSync(path.join(DHTAppConfig.TemplateDir, 'index.html'), 'utf8')
-}
-
 const templatePaths = {
     index: path.join(DHTAppConfig.TemplateDir, 'index.html')
 }
 
 const templateData = { }
 
-for (const [key, value] of templatePaths)
+for (const [key, value] of Object.entries(templatePaths))
 {
     let keyName = key
     let pathName = value
@@ -32,8 +28,8 @@ for (const [key, value] of templatePaths)
     if (DHTAppConfig.HotReloadTemplates)
     {
         fs.watch(pathName, 'utf8', (event, filename) => {
-            templateData[keyName] = fs.readFileSync(filename, 'utf8')
-            console.log(`reloaded template '${keyName}' file ${filename}`)
+            templateData[keyName] = fs.readFileSync(pathName, 'utf8')
+            console.log(`reloaded template '${keyName}' file ${pathName}`)
         })
     }
 }
@@ -112,7 +108,7 @@ app.get('/', (req, res) => {
         lastReadings.push(reading)
     }
 
-    res.send(mustache.render(templates.index, {
+    res.send(mustache.render(templateData.index, {
         Bedroom: FindNodeData("Bedroom").DisplayGraphData,
         Mainroom: FindNodeData("Mainroom").DisplayGraphData,
         NodeData: NodeRegistry,
