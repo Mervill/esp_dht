@@ -9,19 +9,38 @@ const os = require('os')
 const DHTAppConfig = {
     HTTPPort: 8888,
     TemplateDir: path.join(__dirname, 'template'),
+    HotReloadTemplates: true,
     LogDir: path.join(__dirname, 'log'), // LogDir: path.join(__dirname, 'static', 'log')
 }
 
 const templates = {
-    //index: fs.readFileSync(`${DHTAppConfig.TemplateDir}/index.html`, 'utf8')
     index: fs.readFileSync(path.join(DHTAppConfig.TemplateDir, 'index.html'), 'utf8')
+}
+
+const templatePaths = {
+    index: path.join(DHTAppConfig.TemplateDir, 'index.html')
+}
+
+const templateData = { }
+
+for (const [key, value] of templatePaths)
+{
+    let keyName = key
+    let pathName = value
+    templateData[keyName] = fs.readFileSync(pathName, 'utf8')
+    console.log(`loaded template '${keyName}' file ${pathName}`)
+    if (DHTAppConfig.HotReloadTemplates)
+    {
+        fs.watch(pathName, 'utf8', (event, filename) => {
+            templateData[keyName] = fs.readFileSync(filename, 'utf8')
+            console.log(`reloaded template '${keyName}' file ${filename}`)
+        })
+    }
 }
 
 const graphDataLength = (2 * 60 * 24) // 2880
 
 let NodeRegistry = []
-
-let logStream = null;
 
 function FindNodeData(nickname, lazyCreate)
 {
@@ -38,7 +57,6 @@ function FindNodeData(nickname, lazyCreate)
         console.log(`Didn't find node data for nickname ${nickname}`)    
         return null
     }
-        
 
     // didn't find a node with that nickname, so create one
     let newNodeData = {
@@ -70,8 +88,9 @@ function NodeData_AquireLogStream()
 
     if (fileIsNew)
     {
-        this.logStream.write(`${dateFormat(new Date(),"dd/mm/yy @ hh:MM:ssTT")},\n`)
-        this.logStream.write(`time,temperature\n`)
+        //this.logStream.write(`${this.Nickname},${dateFormat(new Date(),"dd/mm/yy @ hh:MM:ssTT")}\n`)
+        this.logStream.write(`${this.Nickname},${dateCode}\n`)
+        this.logStream.write(`time,temp,humi\n`)
     }
 
     let fileState = (fileIsNew) ? "created" : "opened"
