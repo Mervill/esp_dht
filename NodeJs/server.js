@@ -125,10 +125,12 @@ app.post('/log', (req, res) => {
     packet.time = now.getTime()
     packet.log_time = dateFormat(now, "hh:MM:ssTT")
 
+    let req_ip = req.ip
+    let ipv6_ends = (req_ip.lastIndexOf(":") + 1)
+    packet.ip = req_ip.slice(ipv6_ends)
+    
     let nickname = packet.nick
     let nodeData = FindNodeData(nickname, true)
-
-    //nodeData.last_ip = req.connection.remoteAddress
 
     let logString = `${packet.log_time},${packet.temp},${packet.humi},${packet.rssi}`
     nodeData.logStream.write(`${logString}\n`)
