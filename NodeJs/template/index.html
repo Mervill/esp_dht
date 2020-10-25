@@ -4,6 +4,7 @@
     <title>esp chart</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="refresh" content="240">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono" rel="stylesheet">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
         google.charts.load('current', {'packages':['corechart']});
@@ -36,10 +37,19 @@
         }
     </script>
     <style>
+        .roboto {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .sensor-box {
+            width: 200px;
+            text-align: center;
+        }
+        .sensor-title {
+            margin-bottom: 5px;
+        }
         .side-by-side {
             display: inline-block;
             vertical-align: middle;
-            position: relative;
         }
         .temperature-icon {
             text-align: center;
@@ -48,7 +58,6 @@
             height: 30px;
             border-radius: 50%;
             line-height: 40px;
-            margin-right: 10px;
         }
         .humidity-icon {
             text-align: center;
@@ -57,15 +66,14 @@
             height: 30px;
             border-radius: 50%;
             line-height: 36px;
-            margin-right: 10px;
         }
     </style>
 </head>
 <body>
     <div>
         {{#Last}}
-        <div>
-            <div>
+        <div class="roboto sensor-box">
+            <div class="sensor-title">
                 {{nick}}
             </div>
             <div class="side-by-side temperature-icon">
@@ -95,7 +103,7 @@
         {{/Last}}
     </div>
     <div id="main_chart"></div>
-    <div>
+    <div class="roboto">
     {{#Last}}
     <a href="http://{{ip}}">{{nick}}</a> last seen {{log_time}}<br/>
     {{/Last}}

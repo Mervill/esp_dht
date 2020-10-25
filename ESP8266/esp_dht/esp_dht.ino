@@ -23,8 +23,8 @@
 const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASS;
 
-char* remoteAddress = DEPLOY_REMOTE_ADDDR;
-char* sensorNickname = DEPLOY_SENSOR_NICKNAME;
+const char* remoteAddress = DEPLOY_REMOTE_ADDDR;
+const char* sensorNickname = DEPLOY_SENSOR_NICKNAME;
 
 ESP8266WebServer server(80);
                
@@ -274,13 +274,49 @@ void http_Index()
   payload += "</div>\n"; // data
 
   payload += "<div>";
-  //payload +=  "<span>";
+  payload += "<span title=\"RSII\">";
   payload += String(WiFi.RSSI());
+  payload += "</span>";
   payload += "&nbsp;";
-  payload += String((float)millis()/1000.0f);
+  
+  payload += "<span title=\"Uptime (";
+  payload += String(millis()/1000);
+  payload += "s)\">";
+  
+  int sec = millis() / 1000;
+  int days, hours, mins;
+  days   = sec   / 86400;
+  sec   -= days  * 86400;
+  hours  = sec   /  3600;
+  sec   -= hours *  3600;
+  mins   = sec   /    60;
+  sec   -= mins  *    60;
+
+  if (days < 10)
+    payload += "0";
+  payload += String(days);
+  payload += ":";
+
+  if (hours < 10)
+    payload += "0";
+  payload += String(hours);
+  payload += ":";
+
+  if (mins < 10)
+    payload += "0";
+  payload += String(mins);
+  payload += ":";
+
+  if (sec < 10)
+    payload += "0";
+  payload += String(sec);
+
+  payload += "</span>";
   payload += "&nbsp;";
+  
+  payload += "<span title=\"Upsets\">";
   payload += String(ErrorReadNaN);
-  //payload += "</span>";
+  payload += "</span>";
   payload += "</div>";
   
   payload += "</div>\n"; // webpage
@@ -307,11 +343,11 @@ void http_WhoIs()
   payload += "\"";
   payload += ",";
   
-  payload += "\"mac\":";
+  /*payload += "\"mac\":";
   payload += "\"";
   payload += WiFi.macAddress();
   payload += "\"";
-  payload += ",";
+  payload += ",";*/
 
   payload += "\"RSSI\":";
   payload += String(WiFi.RSSI());
